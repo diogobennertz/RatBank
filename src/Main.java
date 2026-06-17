@@ -1,97 +1,177 @@
-import java.io.*;
-import java.util.Scanner;
+import javax.swing.*;
+import java.awt.*;
+import java.util.Random;
 
 public class Main {
+
+    static int pontos = 0;
+    static int tiros = 30;
+    static int naviosEncontrados = 0;
+    static final int TOTAL_NAVIOS = 10;
+
     public static void main(String[] args) {
 
-        Scanner leitor = new Scanner(System.in);
+        UIManager.put("Label.font",
+                new Font("Segoe UI Emoji", Font.PLAIN, 16));
 
-        double saldo = 1000.00;
-        double valorSaque;
-        double valorDeposito;
-        int codigo = 0;
+        UIManager.put("Button.font",
+                new Font("Segoe UI Emoji", Font.PLAIN, 16));
 
-        int cemRatatouilles = 40;
-        int cinquentaRatatouilles = 40;
-        int vinteRatatouilles = 30;
-        int cincoRatatouilles = 15;
-        int doisRatatouilles = 15;
+        JFrame janela = new JFrame("🚢 Batalha Naval");
+        janela.setSize(800, 700);
+        janela.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        janela.setLayout(new BorderLayout());
 
-        // Carregar saldo salvo
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("saldo.txt"));
-            saldo = Double.parseDouble(reader.readLine());
-            reader.close();
-            System.out.println("Saldo carregado com sucesso!");
-        } catch (IOException e) {
-            System.out.println("Primeira execução. Saldo inicial: 1000 ratatouilles.");
-        }
+        // Título
+        JLabel titulo = new JLabel(
+                "🚢 BATALHA NAVAL 🚢",
+                SwingConstants.CENTER
+        );
 
-        while (codigo != 4) {
+        titulo.setFont(new Font("Segoe UI Emoji", Font.BOLD, 28));
+        titulo.setForeground(new Color(25, 25, 112));
+        titulo.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-            System.out.println("\n| ======= Bem Vindo Ao RatoBank! ======= |");
-            System.out.println("| =======    Caixa Eletrônico    ======= |");
-            System.out.println("|   1 - Consultar Saldo;                 |");
-            System.out.println("|   2 - Realizar Saque;                  |");
-            System.out.println("|   3 - Realizar Depósito;               |");
-            System.out.println("|   4 - Sair                             |");
-            System.out.println("==========================================");
-            System.out.print("Informe a Opção Desejada: ");
+        // Informações
+        JPanel painelInfo = new JPanel();
 
-            codigo = leitor.nextInt();
+        JLabel lblPontos = new JLabel("⭐ Pontos: 0");
+        JLabel lblTiros = new JLabel("🎯 Tiros: 30");
 
-            switch (codigo) {
+        lblPontos.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+        lblTiros.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
 
-                case 1:
-                    System.out.println("Seu saldo é de " + saldo + " ratatouilles.");
-                    break;
+        painelInfo.add(lblPontos);
+        painelInfo.add(Box.createHorizontalStrut(50));
+        painelInfo.add(lblTiros);
 
-                case 2:
-                    System.out.print("Informe o valor do saque: ");
-                    valorSaque = leitor.nextDouble();
+        JPanel topo = new JPanel(new BorderLayout());
+        topo.add(titulo, BorderLayout.NORTH);
+        topo.add(painelInfo, BorderLayout.CENTER);
 
-                    if (valorSaque > saldo) {
-                        System.out.println("Valor indisponível! Saldo disponível: " + saldo);
-                    } else {
-                        saldo -= valorSaque;
-                        System.out.println("Saque de " + valorSaque + " ratatouilles efetuado.");
-                    }
-                    break;
+        janela.add(topo, BorderLayout.NORTH);
 
-                case 3:
-                    System.out.print("Informe o valor do depósito: ");
-                    valorDeposito = leitor.nextDouble();
+        // Tabuleiro
+        JPanel tabuleiro = new JPanel();
+        tabuleiro.setLayout(new GridLayout(10, 10, 2, 2));
+        tabuleiro.setBorder(
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        );
 
-                    while (valorDeposito <= 0) {
-                        System.out.print("Valor inválido! Digite um valor positivo: ");
-                        valorDeposito = leitor.nextDouble();
-                    }
+        boolean[][] navios = new boolean[10][10];
+        JButton[][] botoes = new JButton[10][10];
 
-                    saldo += valorDeposito;
-                    System.out.println("Depósito realizado com sucesso!");
-                    break;
+        Random random = new Random();
 
-                case 4:
+        int quantidade = 0;
 
-                    // Salvar saldo antes de sair
-                    try {
-                        FileWriter writer = new FileWriter("saldo.txt");
-                        writer.write(String.valueOf(saldo));
-                        writer.close();
+        while (quantidade < TOTAL_NAVIOS) {
 
-                        System.out.println("Saldo salvo com sucesso!");
-                    } catch (IOException e) {
-                        System.out.println("Erro ao salvar saldo.");
-                    }
+            int linha = random.nextInt(10);
+            int coluna = random.nextInt(10);
 
-                    System.out.println("Obrigado por utilizar o RatoBank!");
-                    break;
-
-                default:
-                    System.out.println("Opção inválida!");
+            if (!navios[linha][coluna]) {
+                navios[linha][coluna] = true;
+                quantidade++;
             }
         }
 
-        leitor.close();
+        for (int linha = 0; linha < 10; linha++) {
+
+            for (int coluna = 0; coluna < 10; coluna++) {
+
+                JButton botao = new JButton("🌊");
+
+                botao.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
+                botao.setBackground(new Color(70, 130, 180));
+                botao.setForeground(Color.WHITE);
+                botao.setFocusPainted(false);
+
+                botoes[linha][coluna] = botao;
+
+                int l = linha;
+                int c = coluna;
+
+                botao.addActionListener(e -> {
+
+                    if (!botao.isEnabled()) {
+                        return;
+                    }
+
+                    tiros--;
+
+                    if (navios[l][c]) {
+
+                        botao.setText("💥");
+                        botao.setBackground(new Color(220, 20, 60));
+
+                        pontos += 100;
+                        naviosEncontrados++;
+
+                    } else {
+
+                        botao.setText("💦");
+                        botao.setBackground(new Color(0, 102, 167));
+                    }
+
+                    botao.setEnabled(false);
+
+                    lblPontos.setText("⭐ Pontos: " + pontos);
+                    lblTiros.setText("🎯 Tiros: " + tiros);
+
+                    // Vitória
+                    if (naviosEncontrados == TOTAL_NAVIOS) {
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "🏆 Parabéns!\nVocê encontrou todos os navios!"
+                        );
+
+                        for (int i = 0; i < 10; i++) {
+                            for (int j = 0; j < 10; j++) {
+                                botoes[i][j].setEnabled(false);
+                            }
+                        }
+                    }
+
+                    // Derrota
+                    if (tiros == 0 && naviosEncontrados < TOTAL_NAVIOS) {
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "💀 Fim de jogo!\nPontuação: " + pontos
+                        );
+
+                        for (int i = 0; i < 10; i++) {
+                            for (int j = 0; j < 10; j++) {
+                                botoes[i][j].setEnabled(false);
+                            }
+                        }
+                    }
+                });
+
+                tabuleiro.add(botao);
+            }
+        }
+
+        JButton reiniciar = new JButton("🔄 Novo Jogo");
+        reiniciar.setFont(new Font("Segoe UI Emoji", Font.BOLD, 16));
+
+        reiniciar.addActionListener(e -> {
+            janela.dispose();
+            pontos = 0;
+            tiros = 30;
+            naviosEncontrados = 0;
+            main(null);
+        });
+
+        JPanel rodape = new JPanel();
+        rodape.add(reiniciar);
+
+        janela.add(tabuleiro, BorderLayout.CENTER);
+        janela.add(rodape, BorderLayout.SOUTH);
+
+        janela.setLocationRelativeTo(null);
+        janela.setVisible(true);
     }
 }
